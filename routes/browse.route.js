@@ -4,6 +4,41 @@ const { PostModel } = require("../models/post.model");
 const browseRouter= express.Router();
 
 browseRouter.get("/", async(req, res)=>{
+    const {sort, category, input, page}= req.query;
+    try {
+        if(sort && category){
+            if(sort==="asc" && category){
+                const data= await PostModel.find({category}).sort({postedAt : 1}).skip(4*page).limit(4);
+                res.send(data);
+            }else if(sort==="desc" && category){
+                const data= await PostModel.find({category}).sort({postedAt : -1}).skip(4*page).limit(4);
+                res.send(data);
+            }
+        }else if(sort){
+            if(sort==="asc"){
+                const data= await PostModel.find().sort({postedAt : 1}).skip(4*page).limit(4);
+                res.send(data);
+            }else if(sort==="desc"){
+                const data= await PostModel.find().sort({postedAt : -1}).skip(4*page).limit(4);
+                res.send(data);
+            }
+        }else if(category){
+            const data= await PostModel.find({category}).skip(4*page).limit(4);
+            res.send(data);
+        }else if(input){
+            const data= await PostModel.find({"name" : {"$regex" : input, "$options" : "i"}}).skip(4*page).limit(4);
+            res.send(data);
+        }else{
+            const data= await PostModel.find().skip(4*page).limit(4);
+            res.send(data);
+        }
+    } catch (error) {
+        console.log({"error":error});
+        res.send("Unable to get the posts")
+    }
+})
+
+browseRouter.get("/total", async(req, res)=>{
     const {sort, category, input}= req.query;
     try {
         if(sort && category){
@@ -37,6 +72,8 @@ browseRouter.get("/", async(req, res)=>{
         res.send("Unable to get the posts")
     }
 })
+
+
 
 browseRouter.delete("/:id", async(req, res)=>{
     const id= req.params.id;
