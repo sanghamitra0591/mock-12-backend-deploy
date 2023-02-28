@@ -2,8 +2,14 @@ const express= require("express");
 const { connection } = require("./configs/db");
 const { browseRouter } = require("./routes/browse.route");
 const { postRouter } = require("./routes/post.route");
+const cors= require("cors")
 
 const app= express();
+
+
+app.use(cors({
+    origin: "*"
+}))
 
 app.use(express.json());
 
